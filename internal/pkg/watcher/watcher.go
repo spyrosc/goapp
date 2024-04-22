@@ -42,7 +42,9 @@ func (w *Watcher) Start() error {
 		for {
 			select {
 			case <-w.inCh:
+				w.counterLock.Lock()
 				w.counter.Iteration += 1
+				w.counterLock.Unlock()
 				select {
 				case w.outCh <- w.counter:
 				case <-w.quitChannel:
@@ -58,8 +60,6 @@ func (w *Watcher) Start() error {
 }
 
 func (w *Watcher) Stop() {
-	w.counterLock.Lock()
-	defer w.counterLock.Unlock()
 
 	close(w.quitChannel)
 	w.running.Wait()
